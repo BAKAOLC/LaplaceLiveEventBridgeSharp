@@ -1,0 +1,83 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        dotnet-version: ['10.0.x']
+      fail-fast: false
+    
+    steps:
+    - uses: actions/checkout@v6
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
+    
+    - name: Restore dependencies
+      run: dotnet restore LaplaceLiveEventBridge.slnx
+    
+    - name: Build
+      run: dotnet build LaplaceLiveEventBridge.slnx --configuration Release --no-restore
+    
+    - name: Test AOT Compatibility
+      run: dotnet publish Laplace.EventBridge.Sdk/Laplace.EventBridge.Sdk.csproj -c Release
+    
+    - name: Build Example
+      run: dotnet build Laplace.EventBridge.Example/Laplace.EventBridge.Example.csproj --configuration Release
+
+  publish-aot:
+    needs: build
+    runs-on: ${{ matrix.os }}
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            artifact-name: linux-x64
+            runtime: linux-x64
+          - os: windows-latest
+            artifact-name: win-x64
+            runtime: win-x64
+          - os: macos-latest
+            artifact-name: osx-x64
+            runtime: osx-x64
+      fail-fast: false
+    
+    steps:
+    - uses: actions/checkout@v6
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: '10.0.x'
+    
+    - name: Publish AOT Example
+      run: dotnet publish Laplace.EventBridge.Example/Laplace.EventBridge.Example.csproj -c Release -r ${{ matrix.runtime }} -p:PublishAot=true --self-contained -o artifacts/${{ matrix.artifact-name }}
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v6
+      with:
+        name: example-${{ matrix.artifact-name }}
+        path: artifacts/${{ matrix.artifact-name }}
+        retention-days: 30
+        compression-level: 6

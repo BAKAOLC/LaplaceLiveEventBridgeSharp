@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <ProjectReference Include="..\Laplace.EventBridge.Sdk\Laplace.EventBridge.Sdk.csproj"/>
+    </ItemGroup>
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+        <!-- Native AOT configuration for C exports -->
+        <OutputType>Library</OutputType>
+        <PublishAot>true</PublishAot>
+        <IsAotCompatible>true</IsAotCompatible>
+        <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+        <IsTrimmable>true</IsTrimmable>
+
+        <!-- Ensure symbols are exported -->
+        <IlcExportUnmanagedEntrypoints>true</IlcExportUnmanagedEntrypoints>
+        <IlcGenerateDgmlFile>false</IlcGenerateDgmlFile>
+
+        <Version>1.0.0</Version>
+        <Authors>OLC</Authors>
+        <Description>Lua FFI wrapper for LAPLACE Event Bridge SDK with AOT support</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    </PropertyGroup>
+
+</Project>

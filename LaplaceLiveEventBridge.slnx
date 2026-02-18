@@ -1,0 +1,5 @@
+<Solution>
+    <Project Path="Laplace.EventBridge.Example/Laplace.EventBridge.Example.csproj"/>
+    <Project Path="Laplace.EventBridge.LuaWrapper/Laplace.EventBridge.LuaWrapper.csproj"/>
+    <Project Path="Laplace.EventBridge.Sdk/Laplace.EventBridge.Sdk.csproj"/>
+</Solution>

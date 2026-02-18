@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsAotCompatible>true</IsAotCompatible>
+        <PublishAot>false</PublishAot>
+        <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+        <IsTrimmable>true</IsTrimmable>
+        <Version>1.0.0</Version>
+        <Authors>OLC</Authors>
+        <Description>C# SDK for LAPLACE Event Bridge (C# port of https://github.com/laplace-live/event-bridge)</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/laplace-live/event-bridge</RepositoryUrl>
+    </PropertyGroup>
+
+</Project>
