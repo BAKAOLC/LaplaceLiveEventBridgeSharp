@@ -11,10 +11,10 @@ namespace Laplace.EventBridge.Sdk
     /// </summary>
     public class LaplaceEventBridgeClient : IDisposable
     {
-        private readonly List<Action<LaplaceEvent>> _anyEventHandlers = new();
-        private readonly List<Action<ConnectionState>> _connectionStateHandlers = new();
+        private readonly List<Action<LaplaceEvent>> _anyEventHandlers = [];
+        private readonly List<Action<ConnectionState>> _connectionStateHandlers = [];
 
-        private readonly Dictionary<string, List<Action<LaplaceEvent>>> _eventHandlers = new();
+        private readonly Dictionary<string, List<Action<LaplaceEvent>>> _eventHandlers = [];
         private readonly ConnectionOptions _options;
         private string? _clientId;
         private CancellationTokenSource? _connectionCts;
@@ -41,6 +41,8 @@ namespace Laplace.EventBridge.Sdk
             _connectionCts?.Dispose();
             _reconnectTimer?.Dispose();
             _pingMonitorTimer?.Dispose();
+
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
@@ -48,7 +50,7 @@ namespace Laplace.EventBridge.Sdk
         /// </summary>
         public async Task ConnectAsync(CancellationToken cancellationToken = default)
         {
-            if (_webSocket != null) _webSocket.Dispose();
+            _webSocket?.Dispose();
 
             SetConnectionState(ConnectionState.Connecting);
             _connectionCts = new();
@@ -62,7 +64,7 @@ namespace Laplace.EventBridge.Sdk
                 {
                     var uriBuilder = new UriBuilder(uri);
                     var query = uriBuilder.Query;
-                    if (query.Length > 1) query = query.Substring(1); // Remove leading '?'
+                    if (query.Length > 1) query = query[1..]; // Remove leading '?'
 
                     if (query.Length > 0)
                         query += "&";
@@ -142,7 +144,7 @@ namespace Laplace.EventBridge.Sdk
         public void On<T>(Action<T> handler) where T : LaplaceEvent
         {
             var eventType = GetEventTypeName<T>();
-            if (!_eventHandlers.ContainsKey(eventType)) _eventHandlers[eventType] = new();
+            if (!_eventHandlers.ContainsKey(eventType)) _eventHandlers[eventType] = [];
             _eventHandlers[eventType].Add(evt => handler((T)evt));
         }
 
