@@ -40,36 +40,70 @@ ffi.cdef [[
 local M = {}
 
 -- Load the native library
--- You can customize the path by setting M.lib_path before requiring this module
+-- You must call init() before using the library
 -- Example: 
 --   local leb = require("laplace_event_bridge")
---   leb:init("path/to/Laplace.EventBridge.LuaWrapper.dll")
+--   leb:init()  -- Auto-detect from current directory: ./windows/x64/xxx.dll
+--   leb:init("/path/to/libs/")  -- Auto-detect from custom directory
+--   leb:init("/path/to/libs/", "custom.dll")  -- Custom file in custom directory
+--   leb:init(nil, "custom.dll")  -- Custom file in current directory
 local leb
 
-function M:init(custom_path)
+function M:init(custom_dir, custom_file)
     if leb then
         return
     end  -- Already initialized
 
-    local lib_name = custom_path
-    if not lib_name then
-        -- Auto-detect platform
+    local lib_name
+    
+    if custom_file then
+        -- Custom file specified
+        local dir = custom_dir or ""
+        lib_name = dir .. custom_file
+    else
+        -- Auto-detect platform and architecture
+        local dir = custom_dir or ""
+        local arch = ffi.arch
+        local platform_dir = ""
+        local arch_dir = ""
+        
+        -- Determine platform directory
         if ffi.os == "Windows" then
-            lib_name = "Laplace.EventBridge.LuaWrapper.dll"
+            platform_dir = "windows/"
         elseif ffi.os == "Linux" then
-            lib_name = "libLaplace.EventBridge.LuaWrapper.so"
+            platform_dir = "linux/"
         elseif ffi.os == "OSX" then
-            lib_name = "libLaplace.EventBridge.LuaWrapper.dylib"
+            platform_dir = "osx/"
         else
             error("Unsupported platform: " .. ffi.os)
         end
+        
+        -- Determine architecture directory
+        if arch == "x64" or arch == "x86_64" then
+            arch_dir = "x64/"
+        elseif arch == "x86" then
+            arch_dir = "x86/"
+        elseif arch == "arm64" or arch == "aarch64" then
+            arch_dir = "arm64/"
+        else
+            error("Unsupported architecture: " .. arch)
+        end
+        
+        -- Determine library name
+        local lib_file = ""
+        if ffi.os == "Windows" then
+            lib_file = "Laplace.EventBridge.LuaWrapper.dll"
+        elseif ffi.os == "Linux" then
+            lib_file = "libLaplace.EventBridge.LuaWrapper.so"
+        elseif ffi.os == "OSX" then
+            lib_file = "libLaplace.EventBridge.LuaWrapper.dylib"
+        end
+        
+        lib_name = dir .. platform_dir .. arch_dir .. lib_file
     end
 
     leb = ffi.load(lib_name)
 end
-
--- Auto-initialize on module load
-M:init()
 
 -- Connection states
 local ConnectionState = {

@@ -48,3 +48,7 @@ artifacts/
 *.dll
 *.exe
 *.pdb
+
+# Publish output
+publish_output/
+temp_output.txt
